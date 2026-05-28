@@ -1,0 +1,1187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Goals 2k26</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0a;
+    --surface: #111111;
+    --surface2: #1a1a1a;
+    --border: #222222;
+    --accent: #c8f540;
+    --accent2: #f5c840;
+    --text: #f0f0f0;
+    --text-dim: #666666;
+    --text-mid: #999999;
+    --red: #ff4444;
+    --green: #c8f540;
+    --radius: 16px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* LOADING */
+  #loading {
+    position: fixed; inset: 0;
+    background: var(--bg);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 1000;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .loader-ring {
+    width: 48px; height: 48px;
+    border: 2px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* LOGIN */
+  #login-screen {
+    display: none;
+    min-height: 100vh;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+  .login-card {
+    width: 100%;
+    max-width: 400px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    padding: 40px 32px;
+  }
+  .login-logo {
+    font-size: 13px;
+    font-family: 'DM Mono', monospace;
+    color: var(--accent);
+    letter-spacing: 0.2em;
+    margin-bottom: 8px;
+  }
+  .login-title {
+    font-size: 32px;
+    font-weight: 800;
+    line-height: 1.1;
+    margin-bottom: 32px;
+  }
+  .form-group { margin-bottom: 16px; }
+  .form-group label {
+    display: block;
+    font-size: 11px;
+    font-family: 'DM Mono', monospace;
+    color: var(--text-dim);
+    letter-spacing: 0.15em;
+    margin-bottom: 8px;
+  }
+  .form-group input, .form-group select {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 16px;
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+    font-size: 15px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .form-group input:focus, .form-group select:focus {
+    border-color: var(--accent);
+  }
+  .form-group select option { background: var(--surface2); }
+  .btn-primary {
+    width: 100%;
+    background: var(--accent);
+    color: #000;
+    border: none;
+    border-radius: 12px;
+    padding: 16px;
+    font-family: 'Syne', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 8px;
+    transition: opacity 0.2s, transform 0.1s;
+  }
+  .btn-primary:hover { opacity: 0.9; }
+  .btn-primary:active { transform: scale(0.98); }
+  .error-msg {
+    color: var(--red);
+    font-size: 13px;
+    font-family: 'DM Mono', monospace;
+    margin-top: 12px;
+    display: none;
+  }
+
+  /* APP */
+  #app { display: none; }
+
+  /* NAV */
+  .nav {
+    position: fixed; top: 0; left: 0; right: 0;
+    z-index: 100;
+    background: rgba(10,10,10,0.9);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 20px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .nav-brand {
+    font-size: 13px;
+    font-family: 'DM Mono', monospace;
+    color: var(--accent);
+    letter-spacing: 0.15em;
+  }
+  .nav-user {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .nav-username {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-mid);
+  }
+  .nav-logout {
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 6px 12px;
+    color: var(--text-dim);
+    font-family: 'Syne', sans-serif;
+    font-size: 12px;
+    cursor: pointer;
+    transition: border-color 0.2s, color 0.2s;
+  }
+  .nav-logout:hover { border-color: var(--text-mid); color: var(--text); }
+
+  /* TABS */
+  .tabs {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    z-index: 100;
+    background: rgba(10,10,10,0.95);
+    backdrop-filter: blur(20px);
+    border-top: 1px solid var(--border);
+    display: flex;
+    padding: 8px 16px 20px;
+    gap: 4px;
+  }
+  .tab-btn {
+    flex: 1;
+    background: none;
+    border: none;
+    border-radius: 12px;
+    padding: 10px 8px;
+    color: var(--text-dim);
+    font-family: 'Syne', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    letter-spacing: 0.05em;
+  }
+  .tab-btn svg { width: 20px; height: 20px; }
+  .tab-btn.active {
+    background: var(--surface2);
+    color: var(--accent);
+  }
+
+  /* MAIN CONTENT */
+  .main {
+    padding: 80px 20px 100px;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  /* PAGE */
+  .page { display: none; }
+  .page.active { display: block; }
+
+  /* TODAY PAGE */
+  .page-header {
+    margin-bottom: 24px;
+  }
+  .page-label {
+    font-size: 11px;
+    font-family: 'DM Mono', monospace;
+    color: var(--text-dim);
+    letter-spacing: 0.2em;
+    margin-bottom: 4px;
+  }
+  .page-title {
+    font-size: 28px;
+    font-weight: 800;
+  }
+  .date-str {
+    font-size: 13px;
+    font-family: 'DM Mono', monospace;
+    color: var(--text-dim);
+    margin-top: 4px;
+  }
+
+  /* SCORE CARD */
+  .score-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .score-label {
+    font-size: 11px;
+    font-family: 'DM Mono', monospace;
+    color: var(--text-dim);
+    letter-spacing: 0.15em;
+    margin-bottom: 4px;
+  }
+  .score-value {
+    font-size: 40px;
+    font-weight: 800;
+    color: var(--accent);
+    line-height: 1;
+  }
+  .score-ring {
+    width: 64px; height: 64px;
+    position: relative;
+  }
+  .score-ring svg {
+    width: 64px; height: 64px;
+    transform: rotate(-90deg);
+  }
+  .score-ring circle {
+    fill: none;
+    stroke-width: 4;
+    stroke-linecap: round;
+  }
+  .ring-bg { stroke: var(--border); }
+  .ring-fill { stroke: var(--accent); transition: stroke-dashoffset 0.6s ease; }
+
+  /* HABIT ITEM */
+  .habits-list { display: flex; flex-direction: column; gap: 10px; }
+  .habit-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+    transition: border-color 0.2s;
+  }
+  .habit-item.completed { border-color: var(--accent); }
+  .habit-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+  }
+  .habit-name {
+    font-size: 14px;
+    font-weight: 600;
+    flex: 1;
+  }
+  .habit-type-badge {
+    font-size: 10px;
+    font-family: 'DM Mono', monospace;
+    color: var(--text-dim);
+    background: var(--surface2);
+    border-radius: 6px;
+    padding: 3px 8px;
+    margin-left: 8px;
+  }
+  .habit-input-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .habit-input {
+    flex: 1;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 14px;
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .habit-input:focus { border-color: var(--accent); }
+  .habit-target {
+    font-size: 12px;
+    font-family: 'DM Mono', monospace;
+    color: var(--text-dim);
+    white-space: nowrap;
+  }
+  .habit-toggle {
+    width: 44px; height: 44px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s;
+    flex-shrink: 0;
+  }
+  .habit-toggle:hover { border-color: var(--accent); }
+  .habit-toggle.done {
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+  .habit-toggle svg { width: 18px; height: 18px; }
+  .habit-progress {
+    margin-top: 10px;
+    height: 3px;
+    background: var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .habit-progress-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 2px;
+    transition: width 0.4s ease;
+  }
+  .habit-pct {
+    font-size: 11px;
+    font-family: 'DM Mono', monospace;
+    color: var(--text-dim);
+    margin-top: 6px;
+    text-align: right;
+  }
+
+  .save-btn {
+    width: 100%;
+    background: var(--accent);
+    color: #000;
+    border: none;
+    border-radius: 14px;
+    padding: 18px;
+    font-family: 'Syne', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 20px;
+    transition: opacity 0.2s, transform 0.1s;
+    letter-spacing: 0.05em;
+  }
+  .save-btn:hover { opacity: 0.9; }
+  .save-btn:active { transform: scale(0.98); }
+  .save-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  /* LEADERBOARD */
+  .period-toggle {
+    display: flex;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 4px;
+    margin-bottom: 24px;
+    gap: 4px;
+  }
+  .period-btn {
+    flex: 1;
+    background: none;
+    border: none;
+    border-radius: 9px;
+    padding: 10px;
+    color: var(--text-dim);
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .period-btn.active {
+    background: var(--surface2);
+    color: var(--accent);
+  }
+
+  .leaderboard-list { display: flex; flex-direction: column; gap: 10px; }
+  .lb-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    transition: border-color 0.2s;
+  }
+  .lb-item.rank-1 { border-color: #ffd700; }
+  .lb-item.rank-2 { border-color: #c0c0c0; }
+  .lb-item.rank-3 { border-color: #cd7f32; }
+  .lb-rank {
+    font-size: 20px;
+    font-weight: 800;
+    width: 32px;
+    text-align: center;
+    font-family: 'DM Mono', monospace;
+  }
+  .rank-1 .lb-rank { color: #ffd700; }
+  .rank-2 .lb-rank { color: #c0c0c0; }
+  .rank-3 .lb-rank { color: #cd7f32; }
+  .lb-info { flex: 1; }
+  .lb-name { font-size: 15px; font-weight: 700; margin-bottom: 2px; }
+  .lb-name.is-you { color: var(--accent); }
+  .lb-days {
+    font-size: 11px;
+    font-family: 'DM Mono', monospace;
+    color: var(--text-dim);
+  }
+  .lb-score {
+    font-size: 22px;
+    font-weight: 800;
+    font-family: 'DM Mono', monospace;
+    color: var(--accent);
+  }
+  .lb-score span {
+    font-size: 12px;
+    color: var(--text-dim);
+    font-weight: 400;
+  }
+
+  /* CALENDAR */
+  .calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+    margin-bottom: 24px;
+  }
+  .cal-day-label {
+    text-align: center;
+    font-size: 10px;
+    font-family: 'DM Mono', monospace;
+    color: var(--text-dim);
+    padding: 4px 0;
+  }
+  .cal-day {
+    aspect-ratio: 1;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-family: 'DM Mono', monospace;
+    color: var(--text-dim);
+    cursor: default;
+    transition: all 0.2s;
+  }
+  .cal-day.empty { background: transparent; }
+  .cal-day.future { background: var(--surface); color: var(--border); }
+  .cal-day.no-data { background: var(--surface); }
+  .cal-day.green { background: var(--accent); color: #000; font-weight: 700; }
+  .cal-day.yellow { background: var(--accent2); color: #000; font-weight: 700; }
+  .cal-day.red { background: #331111; color: var(--red); border: 1px solid #ff444433; }
+  .cal-day.today { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .streak-bar {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px 20px;
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+  }
+  .streak-stat { text-align: center; }
+  .streak-val {
+    font-size: 24px;
+    font-weight: 800;
+    color: var(--accent);
+    font-family: 'DM Mono', monospace;
+  }
+  .streak-lbl {
+    font-size: 10px;
+    font-family: 'DM Mono', monospace;
+    color: var(--text-dim);
+    letter-spacing: 0.1em;
+    margin-top: 2px;
+  }
+
+  /* TOAST */
+  .toast {
+    position: fixed;
+    bottom: 100px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--accent);
+    color: #000;
+    padding: 12px 24px;
+    border-radius: 100px;
+    font-size: 14px;
+    font-weight: 700;
+    opacity: 0;
+    transition: all 0.3s;
+    z-index: 200;
+    white-space: nowrap;
+  }
+  .toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text-dim);
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    line-height: 1.8;
+  }
+
+  .section-label {
+    font-size: 11px;
+    font-family: 'DM Mono', monospace;
+    color: var(--text-dim);
+    letter-spacing: 0.2em;
+    margin-bottom: 12px;
+  }
+</style>
+</head>
+<body>
+
+<div id="loading">
+  <div class="loader-ring"></div>
+  <div style="font-size:12px;font-family:'DM Mono',monospace;color:var(--text-dim);letter-spacing:0.2em">GOALS 2K26</div>
+</div>
+
+<div id="login-screen">
+  <div class="login-card">
+    <div class="login-logo">GOALS 2K26</div>
+    <div class="login-title">Log in.<br>Show up.</div>
+    <div class="form-group">
+      <label>WHO ARE YOU</label>
+      <select id="login-user">
+        <option value="">Select your name</option>
+        <option value="shiv">Shiv</option>
+        <option value="amrita">Amrita</option>
+        <option value="dhruv">Dhruv</option>
+        <option value="shubham">Shubham</option>
+        <option value="pankti">Pankti</option>
+        <option value="akshu">Akshu</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>PASSWORD</label>
+      <input type="password" id="login-pass" placeholder="••••••••" />
+    </div>
+    <button class="btn-primary" onclick="doLogin()">Enter</button>
+    <div class="error-msg" id="login-error">Wrong password. Try again.</div>
+  </div>
+</div>
+
+<div id="app">
+  <nav class="nav">
+    <div class="nav-brand">GOALS 2K26</div>
+    <div class="nav-user">
+      <div class="nav-username" id="nav-username"></div>
+      <button class="nav-logout" onclick="doLogout()">logout</button>
+    </div>
+  </nav>
+
+  <div class="main">
+    <!-- TODAY -->
+    <div class="page active" id="page-today">
+      <div class="page-header">
+        <div class="page-label">TODAY</div>
+        <div class="page-title" id="today-greeting">Good morning.</div>
+        <div class="date-str" id="today-date"></div>
+      </div>
+
+      <div class="score-card">
+        <div>
+          <div class="score-label">TODAY'S SCORE</div>
+          <div class="score-value" id="today-score">0%</div>
+        </div>
+        <div class="score-ring">
+          <svg viewBox="0 0 64 64">
+            <circle class="ring-bg" cx="32" cy="32" r="28" />
+            <circle class="ring-fill" id="ring-fill" cx="32" cy="32" r="28"
+              stroke-dasharray="175.93"
+              stroke-dashoffset="175.93" />
+          </svg>
+        </div>
+      </div>
+
+      <div class="section-label">YOUR HABITS</div>
+      <div class="habits-list" id="habits-list"></div>
+      <button class="save-btn" id="save-btn" onclick="saveToday()">Save Today's Progress</button>
+    </div>
+
+    <!-- LEADERBOARD -->
+    <div class="page" id="page-leaderboard">
+      <div class="page-header">
+        <div class="page-label">RANKINGS</div>
+        <div class="page-title">Leaderboard</div>
+      </div>
+      <div class="period-toggle">
+        <button class="period-btn active" onclick="setPeriod('weekly', this)">Weekly</button>
+        <button class="period-btn" onclick="setPeriod('monthly', this)">Monthly</button>
+        <button class="period-btn" onclick="setPeriod('alltime', this)">All Time</button>
+      </div>
+      <div class="leaderboard-list" id="leaderboard-list">
+        <div class="empty-state">Loading rankings...</div>
+      </div>
+    </div>
+
+    <!-- CALENDAR -->
+    <div class="page" id="page-calendar">
+      <div class="page-header">
+        <div class="page-label">HISTORY</div>
+        <div class="page-title">Your Journey</div>
+      </div>
+      <div class="streak-bar" id="streak-bar">
+        <div class="streak-stat">
+          <div class="streak-val" id="streak-current">0</div>
+          <div class="streak-lbl">STREAK</div>
+        </div>
+        <div class="streak-stat">
+          <div class="streak-val" id="streak-best">0</div>
+          <div class="streak-lbl">BEST</div>
+        </div>
+        <div class="streak-stat">
+          <div class="streak-val" id="streak-logged">0</div>
+          <div class="streak-lbl">DAYS LOGGED</div>
+        </div>
+        <div class="streak-stat">
+          <div class="streak-val" id="streak-avg">0%</div>
+          <div class="streak-lbl">AVG SCORE</div>
+        </div>
+      </div>
+      <div class="calendar-grid" id="calendar-grid"></div>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('today', this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      Today
+    </button>
+    <button class="tab-btn" onclick="switchTab('leaderboard', this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      Board
+    </button>
+    <button class="tab-btn" onclick="switchTab('calendar', this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      History
+    </button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
+import { getFirestore, doc, setDoc, getDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyC8SGE-eY5FcRe9WV_LYyLt6U-cfVnVl08",
+  authDomain: "goals-2k26.firebaseapp.com",
+  projectId: "goals-2k26",
+  storageBucket: "goals-2k26.firebasestorage.app",
+  messagingSenderId: "522553086712",
+  appId: "1:522553086712:web:d578ed8a5873a08b58e10d"
+};
+
+const fbApp = initializeApp(firebaseConfig);
+const db = getFirestore(fbApp);
+window.db = db;
+window.firestoreDoc = doc;
+window.firestoreSetDoc = setDoc;
+window.firestoreGetDoc = getDoc;
+window.firestoreCollection = collection;
+window.firestoreGetDocs = getDocs;
+
+document.getElementById('loading').style.display = 'none';
+const saved = localStorage.getItem('goals2k26_user');
+if (saved) {
+  window.currentUser = saved;
+  showApp();
+} else {
+  document.getElementById('login-screen').style.display = 'flex';
+}
+</script>
+
+<script>
+// ─── USER CONFIG ───────────────────────────────────────────────
+const USERS = {
+  shiv:    { pass: 'shiv2k26',    display: 'Shiv' },
+  amrita:  { pass: 'amrita2k26',  display: 'Amrita' },
+  dhruv:   { pass: 'dhruv2k26',   display: 'Dhruv' },
+  shubham: { pass: 'shubham2k26', display: 'Shubham' },
+  pankti:  { pass: 'pankti2k26',  display: 'Pankti' },
+  akshu:   { pass: 'akshu2k26',   display: 'Akshu' },
+};
+
+// ─── HABITS CONFIG ─────────────────────────────────────────────
+const HABITS = {
+  shiv: [
+    { id: 'weight',  name: 'Weight',         type: 'quant', unit: 'kg',    target: 75,   lower: true },
+    { id: 'sleep',   name: 'Sleep',           type: 'quant', unit: 'hrs',   target: 7,    lower: false },
+    { id: 'cals',    name: 'Calories',        type: 'quant', unit: 'kcal',  target: 1700, lower: true },
+    { id: 'steps',   name: 'Steps',           type: 'quant', unit: 'steps', target: 10000,lower: false },
+    { id: 'gym',     name: 'Gym',             type: 'binary' },
+    { id: 'protein', name: 'Protein',         type: 'quant', unit: 'g',     target: 110,  lower: false },
+    { id: 'chess',   name: 'Chess Study',     type: 'binary' },
+    { id: 'read',    name: 'Reading',         type: 'quant', unit: 'pages', target: 15,   lower: false },
+    { id: 'podcast', name: 'Podcast',         type: 'binary' },
+    { id: 'guitar',  name: 'Guitar Practice', type: 'binary' },
+  ],
+  amrita: [
+    { id: 'water',   name: 'Water',           type: 'quant', unit: 'L',     target: 3.5,  lower: false },
+    { id: 'riyaz',   name: 'Riyaz',           type: 'binary' },
+    { id: 'gym',     name: 'Gym',             type: 'binary' },
+    { id: 'squats',  name: 'Squats',          type: 'quant', unit: 'reps',  target: 50,   lower: false },
+    { id: 'plank',   name: 'Plank',           type: 'quant', unit: 'mins',  target: 2,    lower: false },
+    { id: 'nosweet', name: 'No Sweets',       type: 'binary' },
+    { id: 'fruit',   name: 'Fruit',           type: 'binary' },
+    { id: 'dance',   name: 'Dance',           type: 'quant', unit: 'mins',  target: 15,   lower: false },
+    { id: 'sleep',   name: 'Sleep',           type: 'quant', unit: 'hrs',   target: 6.5,  lower: false },
+    { id: 'song',    name: 'Song Practice',   type: 'binary' },
+    { id: 'kathak',  name: 'Kathak',          type: 'binary' },
+  ],
+  dhruv: [
+    { id: 'steps',   name: 'Steps',           type: 'quant', unit: 'steps', target: 15000,lower: false },
+    { id: 'nooily',  name: 'No Oily Food',    type: 'binary' },
+    { id: 'workout', name: 'Workout',         type: 'quant', unit: 'mins',  target: 60,   lower: false },
+    { id: 'nosugar', name: 'No Sugar',        type: 'binary' },
+    { id: 'chai',    name: 'Chai ≤2',         type: 'quant', unit: 'cups',  target: 2,    lower: true },
+    { id: 'sleep',   name: 'Sleep',           type: 'quant', unit: 'hrs',   target: 5.5,  lower: false },
+    { id: 'cook',    name: 'New Dish',        type: 'binary' },
+    { id: 'cooking', name: 'Cooking Skill',   type: 'binary' },
+  ],
+  shubham: [
+    { id: 'gym',     name: 'Gym',             type: 'binary' },
+    { id: 'read',    name: 'Reading',         type: 'quant', unit: 'pages', target: 12,   lower: false },
+    { id: 'meditate',name: 'Meditation',      type: 'quant', unit: 'mins',  target: 10,   lower: false },
+    { id: 'fruit',   name: 'Fruit',           type: 'binary' },
+    { id: 'water',   name: 'Water',           type: 'quant', unit: 'L',     target: 4,    lower: false },
+    { id: 'noinsta', name: 'Insta <2hrs',     type: 'quant', unit: 'hrs',   target: 2,    lower: true },
+    { id: 'mirror',  name: 'Mirror Speaking', type: 'quant', unit: 'mins',  target: 5,    lower: false },
+    { id: 'moonwalk',name: 'Moonwalk',        type: 'binary' },
+  ],
+  pankti: [
+    { id: 'healthy', name: 'Healthy Food',    type: 'binary' },
+    { id: 'workout', name: 'Workout',         type: 'quant', unit: 'mins',  target: 45,   lower: false },
+    { id: 'dance',   name: 'Dance',           type: 'quant', unit: 'mins',  target: 45,   lower: false },
+    { id: 'sleep',   name: 'Sleep',           type: 'quant', unit: 'hrs',   target: 5.5,  lower: false },
+    { id: 'water',   name: 'Water',           type: 'quant', unit: 'L',     target: 3,    lower: false },
+    { id: 'dance2',  name: 'Dance Skill',     type: 'binary' },
+  ],
+  akshu: [
+    { id: 'sleep',   name: 'Sleep',           type: 'quant', unit: 'hrs',   target: 6,    lower: false },
+    { id: 'cals',    name: 'Calories',        type: 'quant', unit: 'kcal',  target: 1700, lower: true },
+    { id: 'steps',   name: 'Steps',           type: 'quant', unit: 'steps', target: 12000,lower: false },
+    { id: 'gym',     name: 'Gym',             type: 'binary' },
+    { id: 'protein', name: 'Protein',         type: 'quant', unit: 'g',     target: 125,  lower: false },
+    { id: 'water',   name: 'Water',           type: 'quant', unit: 'L',     target: 3,    lower: false },
+    { id: 'read',    name: 'Reading',         type: 'quant', unit: 'pages', target: 15,   lower: false },
+    { id: 'cfa',     name: 'CFA Study',       type: 'binary' },
+  ],
+};
+
+// ─── STATE ─────────────────────────────────────────────────────
+let currentUser = null;
+let todayValues = {};
+let currentPeriod = 'weekly';
+
+function todayStr() {
+  return new Date().toISOString().split('T')[0];
+}
+
+function getHabits() {
+  return HABITS[currentUser] || [];
+}
+
+// ─── AUTH ───────────────────────────────────────────────────────
+function doLogin() {
+  const user = document.getElementById('login-user').value;
+  const pass = document.getElementById('login-pass').value;
+  const err = document.getElementById('login-error');
+  if (!user) { err.style.display = 'block'; err.textContent = 'Pick your name.'; return; }
+  if (!USERS[user] || USERS[user].pass !== pass) {
+    err.style.display = 'block'; err.textContent = 'Wrong password.'; return;
+  }
+  err.style.display = 'none';
+  localStorage.setItem('goals2k26_user', user);
+  window.currentUser = user;
+  currentUser = user;
+  showApp();
+}
+window.doLogin = doLogin;
+
+function doLogout() {
+  localStorage.removeItem('goals2k26_user');
+  location.reload();
+}
+window.doLogout = doLogout;
+
+function showApp() {
+  currentUser = window.currentUser;
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  document.getElementById('nav-username').textContent = USERS[currentUser].display;
+  initToday();
+}
+
+// ─── TODAY ──────────────────────────────────────────────────────
+async function initToday() {
+  const now = new Date();
+  const hour = now.getHours();
+  const greet = hour < 12 ? 'Good morning.' : hour < 17 ? 'Good afternoon.' : 'Good evening.';
+  document.getElementById('today-greeting').textContent = greet;
+  document.getElementById('today-date').textContent = now.toLocaleDateString('en-IN', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+
+  const dateKey = todayStr();
+  try {
+    const snap = await window.firestoreGetDoc(window.firestoreDoc(window.db, 'logs', `${currentUser}_${dateKey}`));
+    if (snap.exists()) {
+      todayValues = snap.data().values || {};
+    } else {
+      todayValues = {};
+    }
+  } catch(e) { todayValues = {}; }
+
+  renderHabits();
+}
+
+function renderHabits() {
+  const habits = getHabits();
+  const list = document.getElementById('habits-list');
+  list.innerHTML = '';
+  habits.forEach(h => {
+    const val = todayValues[h.id];
+    const pct = calcHabitPct(h, val);
+    const done = pct >= 100;
+    const el = document.createElement('div');
+    el.className = `habit-item${done ? ' completed' : ''}`;
+    el.id = `habit-${h.id}`;
+
+    if (h.type === 'binary') {
+      el.innerHTML = `
+        <div class="habit-header">
+          <div class="habit-name">${h.name}</div>
+          <span class="habit-type-badge">✓ / ✗</span>
+        </div>
+        <div class="habit-input-row">
+          <div style="flex:1;font-family:'DM Mono',monospace;font-size:13px;color:var(--text-dim)">
+            ${done ? '✓ Done' : 'Mark as done'}
+          </div>
+          <button class="habit-toggle${done ? ' done' : ''}" onclick="toggleBinary('${h.id}', this)">
+            ${done
+              ? `<svg viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>`
+              : `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>`
+            }
+          </button>
+        </div>`;
+    } else {
+      const displayVal = val !== undefined ? val : '';
+      el.innerHTML = `
+        <div class="habit-header">
+          <div class="habit-name">${h.name}</div>
+          <span class="habit-type-badge">${h.unit}</span>
+        </div>
+        <div class="habit-input-row">
+          <input class="habit-input" type="number" step="any" placeholder="0"
+            value="${displayVal}"
+            oninput="updateQuant('${h.id}', this.value)"
+            id="input-${h.id}" />
+          <div class="habit-target">/ ${h.target} ${h.unit}</div>
+        </div>
+        <div class="habit-progress">
+          <div class="habit-progress-fill" id="prog-${h.id}" style="width:${Math.min(pct,100)}%"></div>
+        </div>
+        <div class="habit-pct" id="pct-${h.id}">${pct > 0 ? pct.toFixed(1)+'%' : ''}</div>`;
+    }
+    list.appendChild(el);
+  });
+  updateScoreRing();
+}
+
+function calcHabitPct(h, val) {
+  if (val === undefined || val === null || val === '') return 0;
+  if (h.type === 'binary') return val ? 100 : 0;
+  const num = parseFloat(val);
+  if (isNaN(num)) return 0;
+  if (h.lower) {
+    // lower is better: 0 cal = 100%, target cal = 100%, above target = penalized
+    if (num <= h.target) return 100;
+    return Math.max(0, 100 - ((num - h.target) / h.target) * 100);
+  } else {
+    return Math.min(100, (num / h.target) * 100);
+  }
+}
+
+function calcDayScore(valuesObj) {
+  const habits = getHabits();
+  if (!habits.length) return 0;
+  let total = 0;
+  habits.forEach(h => {
+    total += calcHabitPct(h, valuesObj[h.id]);
+  });
+  return total / habits.length;
+}
+
+function calcDayScoreForUser(user, valuesObj) {
+  const habits = HABITS[user] || [];
+  if (!habits.length) return 0;
+  let total = 0;
+  habits.forEach(h => { total += calcHabitPctGeneric(h, valuesObj[h.id]); });
+  return total / habits.length;
+}
+
+function calcHabitPctGeneric(h, val) {
+  if (val === undefined || val === null || val === '') return 0;
+  if (h.type === 'binary') return val ? 100 : 0;
+  const num = parseFloat(val);
+  if (isNaN(num)) return 0;
+  if (h.lower) {
+    if (num <= h.target) return 100;
+    return Math.max(0, 100 - ((num - h.target) / h.target) * 100);
+  } else {
+    return Math.min(100, (num / h.target) * 100);
+  }
+}
+
+function updateScoreRing() {
+  const score = calcDayScore(todayValues);
+  document.getElementById('today-score').textContent = score.toFixed(0) + '%';
+  const circ = 175.93;
+  const offset = circ - (score / 100) * circ;
+  document.getElementById('ring-fill').style.strokeDashoffset = offset;
+}
+
+function toggleBinary(id, btn) {
+  const current = todayValues[id];
+  todayValues[id] = !current;
+  renderHabits();
+}
+window.toggleBinary = toggleBinary;
+
+function updateQuant(id, val) {
+  todayValues[id] = val === '' ? undefined : parseFloat(val);
+  const h = getHabits().find(x => x.id === id);
+  if (h) {
+    const pct = calcHabitPct(h, todayValues[id]);
+    const progEl = document.getElementById(`prog-${id}`);
+    const pctEl = document.getElementById(`pct-${id}`);
+    const itemEl = document.getElementById(`habit-${id}`);
+    if (progEl) progEl.style.width = Math.min(pct, 100) + '%';
+    if (pctEl) pctEl.textContent = pct > 0 ? pct.toFixed(1) + '%' : '';
+    if (itemEl) {
+      itemEl.classList.toggle('completed', pct >= 100);
+    }
+  }
+  updateScoreRing();
+}
+window.updateQuant = updateQuant;
+
+async function saveToday() {
+  const btn = document.getElementById('save-btn');
+  btn.disabled = true;
+  btn.textContent = 'Saving...';
+  const score = calcDayScore(todayValues);
+  const dateKey = todayStr();
+  try {
+    await window.firestoreSetDoc(
+      window.firestoreDoc(window.db, 'logs', `${currentUser}_${dateKey}`),
+      { user: currentUser, date: dateKey, values: todayValues, score: score, savedAt: Date.now() }
+    );
+    showToast('Saved! ' + score.toFixed(0) + '% today 🔥');
+  } catch(e) {
+    showToast('Error saving. Check connection.');
+  }
+  btn.disabled = false;
+  btn.textContent = "Save Today's Progress";
+}
+window.saveToday = saveToday;
+
+// ─── LEADERBOARD ────────────────────────────────────────────────
+async function loadLeaderboard() {
+  const list = document.getElementById('leaderboard-list');
+  list.innerHTML = '<div class="empty-state">Loading...</div>';
+
+  try {
+    const snap = await window.firestoreGetDocs(window.firestoreCollection(window.db, 'logs'));
+    const allLogs = [];
+    snap.forEach(d => allLogs.push(d.data()));
+
+    const now = new Date();
+    const scores = {};
+    Object.keys(USERS).forEach(u => { scores[u] = { total: 0, count: 0 }; });
+
+    allLogs.forEach(log => {
+      if (!log.user || !log.date) return;
+      const logDate = new Date(log.date);
+      let include = false;
+      if (currentPeriod === 'weekly') {
+        const weekAgo = new Date(now); weekAgo.setDate(weekAgo.getDate() - 7);
+        include = logDate >= weekAgo;
+      } else if (currentPeriod === 'monthly') {
+        include = logDate.getMonth() === now.getMonth() && logDate.getFullYear() === now.getFullYear();
+      } else {
+        include = true;
+      }
+      if (include && scores[log.user] !== undefined) {
+        const s = log.score !== undefined ? log.score : calcDayScoreForUser(log.user, log.values || {});
+        scores[log.user].total += s;
+        scores[log.user].count += 1;
+      }
+    });
+
+    const ranked = Object.entries(scores)
+      .map(([u, s]) => ({ user: u, avg: s.count ? s.total / s.count : 0, days: s.count }))
+      .sort((a, b) => b.avg - a.avg);
+
+    list.innerHTML = '';
+    const medals = ['🥇','🥈','🥉'];
+    ranked.forEach((item, i) => {
+      const el = document.createElement('div');
+      el.className = `lb-item rank-${i+1}`;
+      const isYou = item.user === currentUser;
+      el.innerHTML = `
+        <div class="lb-rank">${medals[i] || (i+1)}</div>
+        <div class="lb-info">
+          <div class="lb-name${isYou ? ' is-you' : ''}">${USERS[item.user].display}${isYou ? ' (you)' : ''}</div>
+          <div class="lb-days">${item.days} day${item.days !== 1 ? 's' : ''} logged</div>
+        </div>
+        <div class="lb-score">${item.avg.toFixed(1)}<span>%</span></div>`;
+      list.appendChild(el);
+    });
+  } catch(e) {
+    list.innerHTML = '<div class="empty-state">Could not load rankings.</div>';
+  }
+}
+
+function setPeriod(p, btn) {
+  currentPeriod = p;
+  document.querySelectorAll('.period-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  loadLeaderboard();
+}
+window.setPeriod = setPeriod;
+
+// ─── CALENDAR ───────────────────────────────────────────────────
+async function loadCalendar() {
+  const grid = document.getElementById('calendar-grid');
+  grid.innerHTML = '';
+
+  const days = ['SUN','MON','TUE','WED','THU','FRI','SAT'];
+  days.forEach(d => {
+    const el = document.createElement('div');
+    el.className = 'cal-day-label';
+    el.textContent = d;
+    grid.appendChild(el);
+  });
+
+  try {
+    const snap = await window.firestoreGetDocs(window.firestoreCollection(window.db, 'logs'));
+    const myLogs = {};
+    snap.forEach(d => {
+      const data = d.data();
+      if (data.user === currentUser) myLogs[data.date] = data;
+    });
+
+    // June 1 to Dec 31
+    const start = new Date('2026-06-01');
+    const end = new Date('2026-12-31');
+    const today = new Date(); today.setHours(0,0,0,0);
+
+    // pad to Sunday
+    const startDay = start.getDay();
+    for (let i = 0; i < startDay; i++) {
+      const el = document.createElement('div');
+      el.className = 'cal-day empty';
+      grid.appendChild(el);
+    }
+
+    let streak = 0, bestStreak = 0, tempStreak = 0;
+    let totalScore = 0, loggedDays = 0;
+    const allDates = [];
+    for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+      allDates.push(new Date(d));
+    }
+
+    allDates.forEach(d => {
+      const key = d.toISOString().split('T')[0];
+      const el = document.createElement('div');
+      el.className = 'cal-day';
+      el.title = key;
+      const dayNum = d.getDate();
+      el.textContent = dayNum;
+
+      if (d > today) {
+        el.classList.add('future');
+      } else if (myLogs[key]) {
+        const s = myLogs[key].score || 0;
+        loggedDays++;
+        totalScore += s;
+        if (s >= 80) { el.classList.add('green'); tempStreak++; }
+        else if (s >= 50) { el.classList.add('yellow'); tempStreak = 0; }
+        else { el.classList.add('red'); tempStreak = 0; }
+        if (tempStreak > bestStreak) bestStreak = tempStreak;
+      } else {
+        el.classList.add('no-data');
+        tempStreak = 0;
+      }
+
+      if (d.toDateString() === today.toDateString()) {
+        el.classList.add('today');
+        streak = tempStreak;
+      }
+      grid.appendChild(el);
+    });
+
+    document.getElementById('streak-current').textContent = streak;
+    document.getElementById('streak-best').textContent = bestStreak;
+    document.getElementById('streak-logged').textContent = loggedDays;
+    document.getElementById('streak-avg').textContent = loggedDays ? (totalScore/loggedDays).toFixed(0)+'%' : '0%';
+
+  } catch(e) {
+    grid.innerHTML = '<div class="empty-state">Could not load history.</div>';
+  }
+}
+
+// ─── NAVIGATION ─────────────────────────────────────────────────
+function switchTab(tab, btn) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('page-' + tab).classList.add('active');
+  btn.classList.add('active');
+  if (tab === 'leaderboard') loadLeaderboard();
+  if (tab === 'calendar') loadCalendar();
+}
+window.switchTab = switchTab;
+
+// ─── TOAST ──────────────────────────────────────────────────────
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+</script>
+</body>
+</html>
