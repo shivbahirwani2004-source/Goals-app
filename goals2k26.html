@@ -856,7 +856,7 @@ canvas { width: 100% !important; }
         <button class="date-arrow" id="date-next" onclick="shiftDate(1)">›</button>
         <button class="date-pick-btn" onclick="document.getElementById('date-hidden').showPicker()">📅</button>
         <input type="date" id="date-hidden" class="date-input-hidden"
-          min="2026-06-01" max="2026-12-31"
+          min="2026-05-01" max="2026-12-31"
           onchange="jumpToDate(this.value)" />
       </div>
       <div class="past-banner" id="past-banner">📝 Editing a past date</div>
@@ -1083,32 +1083,35 @@ function formatDateDisplay(k) {
   return d.toLocaleDateString('en-IN',{weekday:'short',day:'numeric',month:'short',year:'numeric'});
 }
 
+const APP_START = '2026-05-01'; // allow logging from May 1 for testing
+
 function updateDateUI() {
   document.getElementById('date-display').textContent = formatDateDisplay(activeDate);
   document.getElementById('date-today-tag').textContent = isToday(activeDate) ? 'TODAY' : '';
-  document.getElementById('date-prev').disabled = activeDate <= '2026-06-01';
+  document.getElementById('date-prev').disabled = activeDate <= APP_START;
   document.getElementById('date-next').disabled = activeDate >= todayKey();
   const banner = document.getElementById('past-banner');
   banner.style.display = !isToday(activeDate) ? 'block' : 'none';
-  // Update greeting only for today
   const h = new Date().getHours();
   document.getElementById('today-greet').textContent = isToday(activeDate)
     ? (h<12?'Good morning.':h<17?'Good afternoon.':'Good evening.')
     : 'Editing past log.';
+  const hi = document.getElementById('date-hidden');
+  if (hi) hi.value = activeDate;
 }
 
 function shiftDate(dir) {
   const d = new Date(activeDate+'T00:00:00');
   d.setDate(d.getDate()+dir);
   const k = d.toISOString().split('T')[0];
-  if (k < '2026-06-01' || k > todayKey()) return;
+  if (k < APP_START || k > todayKey()) return;
   activeDate = k;
   loadDateData();
 }
 window.shiftDate = shiftDate;
 
 function jumpToDate(k) {
-  if (!k || k < '2026-06-01' || k > todayKey()) return;
+  if (!k || k > todayKey()) return;
   activeDate = k;
   loadDateData();
 }
@@ -1400,8 +1403,7 @@ async function loadHist() {
     const myLogs={};
     snap.forEach(d=>{ const x=d.data(); if(x.user===CU) myLogs[x.date]=x; });
 
-    // Stats
-    const start=new Date('2026-06-01'), end=new Date('2026-12-31');
+    const start=new Date('2026-05-01'), end=new Date('2026-12-31');
     const today=new Date(); today.setHours(0,0,0,0);
     let streak=0,best=0,tmp=0,logged=0,totScore=0;
     for(let d=new Date(start);d<=today&&d<=end;d.setDate(d.getDate()+1)){
@@ -1415,7 +1417,6 @@ async function loadHist() {
     document.getElementById('st-logged').textContent=logged;
     document.getElementById('st-avg').textContent=logged?(totScore/logged).toFixed(0)+'%':'0%';
 
-    // Weight graph
     if(USERS[CU].hasWeight) {
       document.getElementById('weight-graph-card').style.display='block';
       const wData=[];
@@ -1426,7 +1427,6 @@ async function loadHist() {
       drawWeightGraph(wData);
     }
 
-    // Heatmaps
     drawHeatmaps(myLogs, start, end, today);
 
   } catch(e) { console.error(e); }
