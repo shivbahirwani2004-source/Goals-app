@@ -618,6 +618,7 @@ body {
   display: flex; align-items: center; gap: 8px;
 }
 .hm-grid {
+  grid-auto-rows: 28px;
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   gap: 3px;
@@ -631,7 +632,7 @@ body {
   letter-spacing: 0.05em;
 }
 .hm-cell {
-  aspect-ratio: 1;
+  height: 28px;
   border-radius: 4px;
   background: var(--bg3);
   transition: all 0.2s;
@@ -800,7 +801,7 @@ canvas { width: 100% !important; }
 }
 .cal-days-header {
   display: grid; grid-template-columns: repeat(7,1fr);
-  margin-bottom: 8px;
+  margin-bottom: 4px;
 }
 .cal-day-lbl {
   text-align: center;
@@ -808,17 +809,21 @@ canvas { width: 100% !important; }
   color: var(--text3); padding: 4px 0;
 }
 .cal-grid {
-  display: grid; grid-template-columns: repeat(7,1fr);
-  gap: 4px;
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  grid-auto-rows: 40px;
+  gap: 3px;
 }
 .cal-cell {
-  aspect-ratio: 1;
-  border-radius: 10px;
+  width: 100%;
+  height: 40px;
+  border-radius: 8px;
   display: flex; align-items: center; justify-content: center;
   font-size: 14px; font-weight: 500;
   cursor: pointer;
   transition: all 0.15s;
   color: var(--text2);
+  position: relative;
 }
 .cal-cell:active { transform: scale(0.92); }
 .cal-cell.empty { cursor: default; }
@@ -1654,20 +1659,30 @@ function drawHeatmaps(myLogs, start, end, today) {
       grid.appendChild(lbl);
     });
 
-    // pad to Sunday
-    const firstDay = new Date(start.getFullYear(), start.getMonth(), start.getDate());
-    const pad = firstDay.getDay(); // 0=Sun
-    for(let i=0;i<pad;i++){
-      const e=document.createElement('div'); e.className='hm-cell'; e.style.background='transparent'; grid.appendChild(e);
+    // build all dates first to avoid mutation bug
+    const allDates = [];
+    const cur = new Date(start.getTime());
+    while (cur <= end) {
+      allDates.push(cur.toISOString().split('T')[0]);
+      cur.setDate(cur.getDate()+1);
     }
 
-    for(let d=new Date(start);d<=end;d.setDate(d.getDate()+1)){
-      const k=d.toISOString().split('T')[0];
+    // pad to Sunday
+    const firstDow = new Date(allDates[0]+'T00:00:00').getDay();
+    for(let i=0;i<firstDow;i++){
+      const e=document.createElement('div');
+      e.className='hm-cell';
+      e.style.background='transparent';
+      e.style.pointerEvents='none';
+      grid.appendChild(e);
+    }
+
+    const todayKey2 = today.toISOString().split('T')[0];
+    allDates.forEach(k=>{
       const cell=document.createElement('div');
       cell.className='hm-cell';
-      const isToday=d.toDateString()===today.toDateString();
-      if(isToday) cell.classList.add('today');
-      if(d>today){ cell.classList.add('future'); }
+      if(k===todayKey2) cell.classList.add('today');
+      if(k>todayKey2){ cell.classList.add('future'); }
       else if(myLogs[k]){
         const p=pct(h,myLogs[k].values?.[h.id]);
         if(p>=80) cell.classList.add('green');
@@ -1675,7 +1690,7 @@ function drawHeatmaps(myLogs, start, end, today) {
         else cell.classList.add('red');
       }
       grid.appendChild(cell);
-    }
+    });
 
     sec.appendChild(grid);
     wrap.appendChild(sec);
