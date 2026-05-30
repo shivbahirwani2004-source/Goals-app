@@ -732,67 +732,116 @@ canvas { width: 100% !important; }
 }
 
 /* ── DATE PICKER ── */
-.date-nav {
-  display: flex; align-items: center; gap: 10px;
+.date-btn {
+  width: 100%;
   background: var(--bg2);
   border: 1px solid var(--border);
   border-radius: var(--r2);
-  padding: 10px 14px;
+  padding: 14px 18px;
   margin-bottom: 16px;
-}
-.date-arrow {
-  background: none; border: none;
-  color: var(--text2);
-  font-size: 18px;
+  display: flex; align-items: center; justify-content: space-between;
   cursor: pointer;
-  padding: 4px 8px;
-  border-radius: 8px;
-  transition: background 0.2s, color 0.2s;
-  line-height: 1;
+  transition: border-color 0.2s;
 }
-.date-arrow:active { background: var(--bg3); color: var(--accent); }
-.date-arrow:disabled { opacity: 0.2; cursor: default; }
-.date-center { flex: 1; text-align: center; }
+.date-btn:active { border-color: var(--accent); }
+.date-btn-left {}
 .date-display {
-  font-size: 14px;
-  font-weight: 600;
+  font-size: 15px; font-weight: 600;
   letter-spacing: -0.01em;
+  text-align: left;
 }
 .date-today-tag {
   font-family: var(--mono);
-  font-size: 9px;
-  letter-spacing: 0.15em;
-  color: var(--accent);
-  margin-top: 2px;
+  font-size: 9px; letter-spacing: 0.15em;
+  color: var(--accent); margin-top: 3px;
 }
-.date-input-hidden {
-  position: absolute; opacity: 0; pointer-events: none; width: 0; height: 0;
+.date-btn-icon { font-size: 20px; }
+
+/* Calendar overlay */
+.cal-overlay {
+  position: fixed; inset: 0; z-index: 500;
+  background: rgba(0,0,0,0.7);
+  backdrop-filter: blur(8px);
+  display: none; align-items: flex-end; justify-content: center;
+  padding-bottom: env(safe-area-inset-bottom);
 }
-.date-pick-btn {
-  background: var(--bg3);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 6px 10px;
-  color: var(--text3);
-  font-family: var(--mono);
-  font-size: 10px;
+.cal-overlay.open { display: flex; animation: slideUp 0.3s cubic-bezier(0.34,1.56,0.64,1); }
+@keyframes slideUp { from { opacity:0; transform:translateY(40px); } to { opacity:1; transform:translateY(0); } }
+.cal-sheet {
+  background: var(--bg2);
+  border: 1px solid var(--border2);
+  border-radius: 24px 24px 0 0;
+  padding: 20px 20px 32px;
+  width: 100%; max-width: 480px;
+}
+.cal-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 20px;
+}
+.cal-month-nav {
+  display: flex; align-items: center; gap: 16px;
+}
+.cal-month-btn {
+  background: var(--bg3); border: 1px solid var(--border);
+  border-radius: 8px; padding: 6px 12px;
+  color: var(--text2); font-size: 16px;
+  cursor: pointer; transition: all 0.15s;
+}
+.cal-month-btn:active { background: var(--bg4); color: var(--accent); }
+.cal-month-label {
+  font-size: 15px; font-weight: 700;
+  letter-spacing: -0.02em; min-width: 120px; text-align: center;
+}
+.cal-close {
+  background: var(--bg3); border: 1px solid var(--border);
+  border-radius: 8px; padding: 6px 12px;
+  color: var(--text3); font-size: 13px; font-weight: 600;
   cursor: pointer;
-  white-space: nowrap;
-  transition: all 0.2s;
 }
-.date-pick-btn:active { color: var(--accent); border-color: var(--accent); }
+.cal-days-header {
+  display: grid; grid-template-columns: repeat(7,1fr);
+  margin-bottom: 8px;
+}
+.cal-day-lbl {
+  text-align: center;
+  font-family: var(--mono); font-size: 10px;
+  color: var(--text3); padding: 4px 0;
+}
+.cal-grid {
+  display: grid; grid-template-columns: repeat(7,1fr);
+  gap: 4px;
+}
+.cal-cell {
+  aspect-ratio: 1;
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+  color: var(--text2);
+}
+.cal-cell:active { transform: scale(0.92); }
+.cal-cell.empty { cursor: default; }
+.cal-cell.future { color: var(--text3); cursor: default; }
+.cal-cell.today { background: rgba(167,139,250,0.15); color: var(--accent); font-weight: 700; }
+.cal-cell.selected { background: var(--accent); color: #000; font-weight: 800; }
+.cal-cell.has-log { position: relative; }
+.cal-cell.has-log::after {
+  content: '';
+  position: absolute; bottom: 4px; left: 50%; transform: translateX(-50%);
+  width: 4px; height: 4px; border-radius: 50%;
+  background: var(--green);
+}
+.cal-cell.selected::after { background: #000; }
+
 .past-banner {
   background: rgba(167,139,250,0.08);
   border: 1px solid rgba(167,139,250,0.2);
   border-radius: 10px;
   padding: 10px 14px;
-  font-family: var(--mono);
-  font-size: 11px;
-  color: var(--accent);
-  letter-spacing: 0.05em;
-  margin-bottom: 12px;
-  display: none;
-  text-align: center;
+  font-family: var(--mono); font-size: 11px;
+  color: var(--accent); letter-spacing: 0.05em;
+  margin-bottom: 12px; display: none; text-align: center;
 }
 </style>
 </head>
@@ -847,17 +896,12 @@ canvas { width: 100% !important; }
         <div class="ph-title" id="today-greet">Good morning.</div>
       </div>
 
-      <div class="date-nav">
-        <button class="date-arrow" id="date-prev" onclick="shiftDate(-1)">‹</button>
-        <div class="date-center">
+      <div class="date-btn" onclick="openCal()">
+        <div class="date-btn-left">
           <div class="date-display" id="date-display"></div>
           <div class="date-today-tag" id="date-today-tag"></div>
         </div>
-        <button class="date-arrow" id="date-next" onclick="shiftDate(1)">›</button>
-        <button class="date-pick-btn" onclick="document.getElementById('date-hidden').showPicker()">📅</button>
-        <input type="date" id="date-hidden" class="date-input-hidden"
-          min="2026-05-01" max="2026-12-31"
-          onchange="jumpToDate(this.value)" />
+        <div class="date-btn-icon">📅</div>
       </div>
       <div class="past-banner" id="past-banner">📝 Editing a past date</div>
 
@@ -958,6 +1002,30 @@ canvas { width: 100% !important; }
 </div>
 
 <div class="toast" id="toast"></div>
+
+<!-- Calendar overlay -->
+<div class="cal-overlay" id="cal-overlay" onclick="closeCal(event)">
+  <div class="cal-sheet" onclick="event.stopPropagation()">
+    <div class="cal-header">
+      <div class="cal-month-nav">
+        <button class="cal-month-btn" onclick="calShiftMonth(-1)">‹</button>
+        <div class="cal-month-label" id="cal-month-label"></div>
+        <button class="cal-month-btn" onclick="calShiftMonth(1)">›</button>
+      </div>
+      <button class="cal-close" onclick="closeCalBtn()">Done</button>
+    </div>
+    <div class="cal-days-header">
+      <div class="cal-day-lbl">SUN</div>
+      <div class="cal-day-lbl">MON</div>
+      <div class="cal-day-lbl">TUE</div>
+      <div class="cal-day-lbl">WED</div>
+      <div class="cal-day-lbl">THU</div>
+      <div class="cal-day-lbl">FRI</div>
+      <div class="cal-day-lbl">SAT</div>
+    </div>
+    <div class="cal-grid" id="cal-grid"></div>
+  </div>
+</div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
@@ -1070,65 +1138,105 @@ const HABITS = {
 
 // ── STATE ────────────────────────────────────────────────────────
 let CU = null, vals = {}, weightVal = null, period = 'week';
-let activeDate = new Date().toISOString().split('T')[0]; // yyyy-mm-dd
+let activeDate = new Date().toISOString().split('T')[0];
+let calYear = new Date().getFullYear(), calMonth = new Date().getMonth();
+let calLogs = {};
 
 function todayKey() { return new Date().toISOString().split('T')[0]; }
 function habits() { return HABITS[CU] || []; }
-
 function isToday(k) { return k === todayKey(); }
-function isFuture(k) { return k > todayKey(); }
 
 function formatDateDisplay(k) {
   const d = new Date(k+'T00:00:00');
   return d.toLocaleDateString('en-IN',{weekday:'short',day:'numeric',month:'short',year:'numeric'});
 }
 
-const APP_START = '2026-05-01'; // allow logging from May 1 for testing
-
 function updateDateUI() {
   document.getElementById('date-display').textContent = formatDateDisplay(activeDate);
   document.getElementById('date-today-tag').textContent = isToday(activeDate) ? 'TODAY' : '';
-  document.getElementById('date-prev').disabled = activeDate <= APP_START;
-  document.getElementById('date-next').disabled = activeDate >= todayKey();
   const banner = document.getElementById('past-banner');
   banner.style.display = !isToday(activeDate) ? 'block' : 'none';
   const h = new Date().getHours();
   document.getElementById('today-greet').textContent = isToday(activeDate)
     ? (h<12?'Good morning.':h<17?'Good afternoon.':'Good evening.')
     : 'Editing past log.';
-  const hi = document.getElementById('date-hidden');
-  if (hi) hi.value = activeDate;
 }
 
-function shiftDate(dir) {
-  const d = new Date(activeDate+'T00:00:00');
-  d.setDate(d.getDate()+dir);
-  const k = d.toISOString().split('T')[0];
-  if (k < APP_START || k > todayKey()) return;
-  activeDate = k;
-  loadDateData();
+// ── CALENDAR POPUP ──────────────────────────────────────────────
+function openCal() {
+  calYear = parseInt(activeDate.split('-')[0]);
+  calMonth = parseInt(activeDate.split('-')[1]) - 1;
+  renderCalGrid();
+  document.getElementById('cal-overlay').classList.add('open');
 }
-window.shiftDate = shiftDate;
+window.openCal = openCal;
 
-function jumpToDate(k) {
-  if (!k || k > todayKey()) return;
+function closeCal(e) { document.getElementById('cal-overlay').classList.remove('open'); }
+window.closeCal = closeCal;
+function closeCalBtn() { document.getElementById('cal-overlay').classList.remove('open'); }
+window.closeCalBtn = closeCalBtn;
+
+function calShiftMonth(dir) {
+  calMonth += dir;
+  if (calMonth < 0) { calMonth = 11; calYear--; }
+  if (calMonth > 11) { calMonth = 0; calYear++; }
+  renderCalGrid();
+}
+window.calShiftMonth = calShiftMonth;
+
+function renderCalGrid() {
+  const months = ['January','February','March','April','May','June',
+    'July','August','September','October','November','December'];
+  document.getElementById('cal-month-label').textContent = months[calMonth]+' '+calYear;
+  const grid = document.getElementById('cal-grid');
+  grid.innerHTML = '';
+  const firstDay = new Date(calYear, calMonth, 1).getDay();
+  const daysInMonth = new Date(calYear, calMonth+1, 0).getDate();
+  const today = todayKey();
+  for (let i = 0; i < firstDay; i++) {
+    const c = document.createElement('div'); c.className='cal-cell empty'; grid.appendChild(c);
+  }
+  for (let day = 1; day <= daysInMonth; day++) {
+    const k = `${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+    const c = document.createElement('div');
+    c.className = 'cal-cell';
+    c.textContent = day;
+    if (k > today) {
+      c.classList.add('future');
+    } else {
+      if (k === today) c.classList.add('today');
+      if (k === activeDate) c.classList.add('selected');
+      if (calLogs[k]) c.classList.add('has-log');
+      c.onclick = () => pickDate(k);
+    }
+    grid.appendChild(c);
+  }
+}
+
+function pickDate(k) {
   activeDate = k;
+  updateDateUI();
+  document.getElementById('cal-overlay').classList.remove('open');
   loadDateData();
 }
-window.jumpToDate = jumpToDate;
+
+async function preloadCalLogs() {
+  try {
+    const snap = await window._getDocs(window._collection(window._db,'logs'));
+    snap.forEach(d => { const x=d.data(); if(x.user===CU&&x.date) calLogs[x.date]=true; });
+  } catch(e) {}
+}
 
 async function loadDateData() {
   updateDateUI();
   try {
     const snap = await window._getDoc(window._doc(window._db,'logs',`${CU}_${activeDate}`));
     if (snap.exists()) {
-      const d = snap.data();
-      vals = d.values || {};
-      weightVal = d.weight || null;
-    } else { vals = {}; weightVal = null; }
-  } catch(e) { vals = {}; weightVal = null; }
+      const d = snap.data(); vals = d.values||{}; weightVal = d.weight||null;
+    } else { vals={}; weightVal=null; }
+  } catch(e) { vals={}; weightVal=null; }
   const wi = document.getElementById('weight-input');
-  if (wi) wi.value = weightVal || '';
+  if (wi) wi.value = weightVal||'';
   renderHabits();
 }
 
@@ -1163,6 +1271,7 @@ async function initToday() {
   if (USERS[CU].hasWeight) {
     document.getElementById('weight-section').style.display='block';
   }
+  await preloadCalLogs();
   await loadDateData();
 }
 
@@ -1324,6 +1433,7 @@ async function saveToday() {
       window._doc(window._db,'logs',`${CU}_${activeDate}`),
       { user:CU, date:activeDate, values:vals, weight, score, ts:Date.now() }
     );
+    calLogs[activeDate] = true;
     toast('Saved! '+score.toFixed(0)+'% '+(!isToday(activeDate)?'for '+formatDateDisplay(activeDate):'today 🔥'));
   } catch(e) { toast('Error saving.'); }
   btn.disabled=false; btn.textContent='Save Today';
@@ -1545,9 +1655,10 @@ function drawHeatmaps(myLogs, start, end, today) {
     });
 
     // pad to Sunday
-    const pad=start.getDay();
+    const firstDay = new Date(start.getFullYear(), start.getMonth(), start.getDate());
+    const pad = firstDay.getDay(); // 0=Sun
     for(let i=0;i<pad;i++){
-      const e=document.createElement('div'); e.className='hm-cell empty'; grid.appendChild(e);
+      const e=document.createElement('div'); e.className='hm-cell'; e.style.background='transparent'; grid.appendChild(e);
     }
 
     for(let d=new Date(start);d<=end;d.setDate(d.getDate()+1)){
