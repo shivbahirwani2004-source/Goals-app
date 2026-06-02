@@ -136,8 +136,9 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
 .wcard-add:active{transform:scale(0.97);}
 .wcard-add:disabled{opacity:0.35;cursor:default;transform:none;}
 .wcard-undo{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:12px 16px;font-family:var(--font);font-size:14px;color:var(--text3);cursor:pointer;}
-.wcard-sessions{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;}
-.session-dot{width:28px;height:28px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#000;}
+.wcard-sessions{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px;}
+.session-dot{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;flex-shrink:0;}
+.session-dot.filled{background:var(--green);color:#000;}
 .session-dot.empty{background:var(--bg3);border:1px solid var(--border);}
 .week-reset-note{font-family:var(--mono);font-size:10px;color:var(--text3);text-align:center;margin-top:8px;letter-spacing:0.05em;}
 
@@ -687,7 +688,7 @@ function renderWeekly(){
     el.className='wcard';
     let dots='';
     for(let i=0;i<h.target;i++){
-      dots+=`<div class="session-dot${i<sessions?'':' empty'}">${i<sessions?'✓':''}</div>`;
+      dots+=`<div class="session-dot ${i<sessions?'filled':'empty'}">${i<sessions?'✓':''}</div>`;
     }
     el.innerHTML=`
       <div class="wcard-top">
@@ -886,7 +887,7 @@ async function loadHist(){
     const snap=await window._docs(window._col(window._db,'logs'));
     const myLogs={};
     snap.forEach(d=>{const x=d.data();if(x.user===CU)myLogs[x.date]=x;});
-    const start=new Date('2026-06-01'),end=new Date('2026-12-31');
+    const start=new Date('2026-05-01'),end=new Date('2026-12-31');
     const today=new Date();today.setHours(0,0,0,0);
     let streak=0,best=0,tmp=0,logged=0,totScore=0;
     const cur=new Date(start);
